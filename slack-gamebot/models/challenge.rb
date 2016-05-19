@@ -213,4 +213,8 @@ class Challenge
     return if Score.tie?(draw_scores)
     errors.add(:scores, 'In a tie both sides must score the same number of points.')
   end
+  
+  def self.next(team, channel, player)
+    return
+  end
 end
