@@ -1,16 +1,12 @@
 module SlackGamebot
   module Commands
-    class Reserve < SlackRubyBot::Commands::Base
+    class Next < SlackRubyBot::Commands::Base
       def self.call(client, data, _match)
-        challenger = ::User.find_create_or_update_by_slack_id!(client, data.user)
-        challenge = ::Challenge.find_by_user(client.owner, data.channel, challenger)
-        if challenge
-          challenge.accept!(challenger)
-          client.say(channel: data.channel, text: "#{challenge.challenged.map(&:user_name).and} accepted #{challenge.challengers.map(&:user_name).and}'s challenge.", gif: 'game')
-          logger.info "ACCEPT: #{client.owner} - #{challenge}"
+        reservation = ::Challenge.next(client.owner, data.channel, data.user)
+        if reservation
+          client.say(channel: data.channel, text: "#{data.user} has next game", gif: 'game')
         else
-          client.say(channel: data.channel, text: 'No challenge to accept!')
-          logger.info "ACCEPT: #{client.owner} - #{data.user}, N/A"
+          client.say(channel: data.channel, text: '#{data.user} you already called next, calm down')
         end
       end
     end
