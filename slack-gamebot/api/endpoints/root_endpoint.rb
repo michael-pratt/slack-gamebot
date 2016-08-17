@@ -3,6 +3,7 @@ module Api
     class RootEndpoint < Grape::API
       include Api::Helpers::ErrorHelpers
 
+      prefix :api
       format :json
       formatter :json, Grape::Formatter::Roar
       get do
@@ -16,6 +17,7 @@ module Api
       mount Api::Endpoints::SeasonsEndpoint
       mount Api::Endpoints::TeamsEndpoint
       mount Api::Endpoints::GamesEndpoint
+      mount Api::Endpoints::SubscriptionsEndpoint
 
       add_swagger_documentation
     end

@@ -1,23 +1,10 @@
 module SlackGamebot
-  class Server < SlackRubyBot::Server
-    attr_accessor :team
-
+  class Server < SlackRubyBotServer::Server
     def initialize(attrs = {})
-      @team = attrs[:team]
-      fail 'Missing team' unless @team
-      options = { token: @team.token }
-      options[:aliases] = ([team.game.name] + [team.aliases]).flatten.compact
-      options[:send_gifs] = team.gifs
-      super(options)
-      client.owner = @team
-    end
-
-    def restart!(wait = 1)
-      # when an integration is disabled, a live socket is closed, which causes the default behavior of the client to restart
-      # it would keep retrying without checking for account_inactive or such, we want to restart via service which will disable an inactive team
-      logger.info "#{team.name}: socket closed, restarting ..."
-      SlackGamebot::Service.instance.restart! team, self, wait
-      client.owner = team
+      attrs = attrs.dup
+      attrs[:aliases] = ([attrs[:team].game.name] + [attrs[:team].aliases]).flatten.compact
+      attrs[:send_gifs] = attrs[:team].gifs
+      super attrs
     end
 
     on :user_change do |client, data|
@@ -25,6 +12,16 @@ module SlackGamebot
       next unless user && user.user_name != data.user.name
       logger.info "RENAME: #{user.user_id}, #{user.user_name} => #{data.user.name}"
       user.update_attributes!(user_name: data.user.name)
+    end
+
+    on :channel_joined do |client, data|
+      logger.info "#{client.owner.name}: joined ##{data.channel['name']}."
+      message = <<-EOS.freeze
+Hi! I am your friendly game bot. Register with `@#{client.self.name} register`.
+Challenge someone to a game of #{client.owner.game.name} with `@#{client.self.name} challenge @someone`.
+Type `@#{client.self.name} help` fore more commands and don't forget to have fun at work!
+      EOS
+      client.say(channel: data.channel['id'], text: message)
     end
   end
 end

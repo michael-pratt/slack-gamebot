@@ -1,5 +1,20 @@
 ### Changelog
 
+* [#113](https://github.com/dblock/slack-gamebot/issues/113): Store elo history - [@dblock](https://github.com/dblock).
+* [#129](https://github.com/dblock/slack-gamebot/issues/129): Added longest winning and losing streaks in leaderboard - [@dblock](https://github.com/dblock).
+* [#124](https://github.com/dblock/slack-gamebot/issues/124): Allow unbalanced challenges via `set unbalanced on` - [@dblock](https://github.com/dblock).
+* [#130](https://github.com/dblock/slack-gamebot/issues/130): Added `unset` to unset settings - [@dblock](https://github.com/dblock).
+* [#123](https://github.com/dblock/slack-gamebot/issues/123): Captains can set other user's nicknames - [@dblock](https://github.com/dblock).
+* [#88](https://github.com/dblock/slack-gamebot/issues/88): Set `nickname` to obfuscate your username in leaderboard output - [@dblock](https://github.com/dblock).
+* [#86](https://github.com/dblock/slack-gamebot/issues/86): Added `unregister` to remove yourself or another player from the leaderboard - [@dblock](https://github.com/dblock).
+* [#119](https://github.com/dblock/slack-gamebot/issues/119): Fix: teams reporting matches with `lost to` incorrectly marked as dead - [@dblock](https://github.com/dblock).
+* [#114](https://github.com/dblock/slack-gamebot/issues/114): Set a team base elo rating with `set elo` for new seasons - [@dblock](https://github.com/dblock).
+* [#116](https://github.com/dblock/slack-gamebot/issues/116): Notify that a team has been upgraded in Slack - [@dblock](https://github.com/dblock).
+* [#117](https://github.com/dblock/slack-gamebot/issues/117): Send a welcome message when the bot joins a channel - [@dblock](https://github.com/dblock).
+* [#112](https://github.com/dblock/slack-gamebot/issues/112): Fix: matches recorded with `lost to` are not displayed in `matches` - [@dblock](https://github.com/dblock).
+* [#118](https://github.com/dblock/slack-gamebot/issues/118): Fix: aliases - [@dblock](https://github.com/dblock).
+* Features such as `seasons` and `set` now require a premium subscription - [@dblock](https://github.com/dblock).
+* Merged playplay.io website, support SSL - [@dblock](https://github.com/dblock).
 * [#103](https://github.com/dblock/slack-gamebot/issues/103): The `set api` method will display team API URL when on - [@dblock](https://github.com/dblock).
 * [#105](https://github.com/dblock/slack-gamebot/issues/105): Fix: `rank` displays multiple unranked users - [@dblock](https://github.com/dblock).
 * [#104](https://github.com/dblock/slack-gamebot/issues/104): Fix: `rank` leaks users from other teams - [@dblock](https://github.com/dblock).

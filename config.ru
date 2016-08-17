@@ -1,5 +1,11 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 
+ENV['RACK_ENV'] ||= 'development'
+
+require 'bundler/setup'
+Bundler.require :default, ENV['RACK_ENV']
+
+require 'slack-ruby-bot-server'
 require 'slack-gamebot'
 
 if ENV['RACK_ENV'] == 'development'
@@ -9,6 +15,10 @@ if ENV['RACK_ENV'] == 'development'
 end
 
 NewRelic::Agent.manual_start
+
+SlackRubyBotServer.configure do |config|
+  config.server_class = SlackGamebot::Server
+end
 
 SlackGamebot::App.instance.prepare!
 

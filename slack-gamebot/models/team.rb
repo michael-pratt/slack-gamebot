@@ -1,25 +1,16 @@
 class Team
-  include Mongoid::Document
-  include Mongoid::Timestamps
-
-  SORT_ORDERS = ['created_at', '-created_at', 'updated_at', '-updated_at']
-
-  field :team_id, type: String
-  field :name, type: String
-  field :domain, type: String
-  field :token, type: String
-  field :active, type: Boolean, default: true
   field :gifs, type: Boolean, default: true
   field :api, type: Boolean, default: false
   field :aliases, type: Array, default: []
   field :nudge_at, type: DateTime
+  field :elo, type: Integer, default: 0
+  field :unbalanced, type: Boolean, default: false
 
-  scope :active, -> { where(active: true) }
+  field :stripe_customer_id, type: String
+  field :premium, type: Boolean, default: false
+
   scope :api, -> { where(api: true) }
 
-  validates_uniqueness_of :token, message: 'has already been used'
-  validates_presence_of :token
-  validates_presence_of :team_id
   validates_presence_of :game_id
 
   has_many :users, dependent: :destroy
@@ -29,16 +20,18 @@ class Team
 
   belongs_to :game
 
+  after_update :inform_premium_changed!
+
+  def premium_text
+    "This is a premium feature. #{upgrade_text}"
+  end
+
+  def upgrade_text
+    "Upgrade your team to premium for $29.99 a year at https://www.playplay.io/upgrade?team_id=#{team_id}&game=#{game.name}."
+  end
+
   def captains
     users.captains
-  end
-
-  def deactivate!
-    update_attributes!(active: false)
-  end
-
-  def activate!(token)
-    update_attributes!(active: true, token: token)
   end
 
   def to_s
@@ -52,20 +45,14 @@ class Team
     end.compact.join(', ')
   end
 
-  def ping!
-    client = Slack::Web::Client.new(token: token)
-    auth = client.auth_test
-    {
-      auth: auth,
-      presence: client.users_getPresence(user: auth['user_id'])
-    }
-  end
-
   def asleep?(dt = 2.weeks)
     time_limit = Time.now - dt
     return false if created_at > time_limit
+    recent_match = matches.desc(:updated_at).limit(1).first
+    return false if recent_match && recent_match.updated_at >= time_limit
     recent_challenge = challenges.desc(:updated_at).limit(1).first
-    recent_challenge.nil? || recent_challenge.updated_at < time_limit
+    return false if recent_challenge && recent_challenge.updated_at >= time_limit
+    true
   end
 
   def nudge?(dt = 2.weeks)
@@ -80,6 +67,7 @@ class Team
 
   def nudge!
     inform! "Challenge someone to a game of #{game.name} today!", 'nudge'
+    update_attributes!(nudge_at: Time.now)
   end
 
   def api_url
@@ -101,7 +89,6 @@ class Team
     end if gif_name && gifs?
     text = [message, gif && gif.image_url.to_s].compact.join("\n")
     client.chat_postMessage(text: text, channel: channel['id'], as_user: true)
-    update_attributes!(nudge_at: Time.now)
   end
 
   def self.find_or_create_from_env!
@@ -118,11 +105,15 @@ class Team
     team
   end
 
-  def self.purge!
-    # destroy teams inactive for two weeks
-    Team.where(active: false, :updated_at.lte => 2.weeks.ago).each do |team|
-      Mongoid.logger.info "Destroying #{team}, inactive since #{team.updated_at}, over two weeks ago."
-      team.destroy
-    end
+  private
+
+  UPGRADED_TEXT = <<-EOS
+Your team has been upgraded, enjoy all premium features. Thanks for supporting open-source!
+Follow https://twitter.com/playplayio for news and updates.
+EOS
+
+  def inform_premium_changed!
+    return unless premium? && premium_changed?
+    inform! UPGRADED_TEXT, 'thanks'
   end
 end

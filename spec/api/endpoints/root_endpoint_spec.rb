@@ -4,37 +4,32 @@ describe Api::Endpoints::RootEndpoint do
   include Api::Test::EndpointTest
 
   it 'hypermedia root' do
-    get '/'
+    get '/api/'
     expect(last_response.status).to eq 200
     links = JSON.parse(last_response.body)['_links']
-    expect(links.keys.sort).to eq(%w(self status team teams user users challenge challenges match matches current_season season seasons game games).sort)
+    expect(links.keys.sort).to eq(%w(self status team teams user users challenge challenges match matches current_season season seasons subscriptions game games).sort)
   end
   it 'follows all links' do
-    get '/'
+    get '/api/'
     expect(last_response.status).to eq 200
     links = JSON.parse(last_response.body)['_links']
     links.each_pair do |_key, h|
       href = h['href']
       next if href.include?('{') # templated link
+      next if href == 'http://example.org/api/subscriptions'
       get href.gsub('http://example.org', '')
       expect(last_response.status).to eq 200
       expect(JSON.parse(last_response.body)).to_not eq({})
     end
   end
-  it 'instruments endpoint with NewRelic' do
-    expect(::NewRelic::Agent::Instrumentation::GrapeInstrumentation).to receive(:handle_transaction).and_call_original
-    expect(::NewRelic::Agent.logger).to_not receive(:warn)
-    get '/'
-    expect(last_response.status).to eq 200
-  end
   it 'rewrites encoded HAL links to make them clickable' do
-    get '/teams/%7B?cursor,size%7D'
+    get '/api/teams/%7B?cursor,size%7D'
     expect(last_response.status).to eq 302
-    expect(last_response.headers['Location']).to eq '/teams/'
+    expect(last_response.headers['Location']).to eq '/api/teams/'
   end
   it 'rewrites unencoded HAL links to make them clickable' do
-    get '/teams/%7B?cursor,size}'
+    get '/api/teams/%7B?cursor,size}'
     expect(last_response.status).to eq 302
-    expect(last_response.headers['Location']).to eq '/teams/'
+    expect(last_response.headers['Location']).to eq '/api/teams/'
   end
 end

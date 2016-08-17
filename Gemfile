@@ -1,34 +1,26 @@
 source 'http://rubygems.org'
 
-ruby '2.2.4'
+ruby '2.3.1'
 
-gem 'slack-ruby-bot', '~> 0.8.0'
-gem 'celluloid-io', require: 'celluloid/current'
-gem 'mongoid', '~> 5.0.0'
+gem 'slack-ruby-bot-server', github: 'dblock/slack-ruby-bot-server'
 gem 'ruby-enum'
-gem 'unicorn'
-gem 'grape', '~> 0.13.0'
-gem 'grape-roar'
-gem 'rack-cors'
-gem 'kaminari', '~> 0.16.1', require: 'kaminari/grape'
-gem 'grape-swagger', '~> 0.10.4'
 gem 'mongoid-scroll'
 gem 'time_ago_in_words'
 gem 'rack-robotz'
-gem 'newrelic_rpm'
-gem 'newrelic-slack-ruby-bot'
-gem 'rack-rewrite'
 gem 'wannabe_bool'
+gem 'newrelic_rpm'
+gem 'rack-server-pages'
+gem 'stripe'
 
 group :development, :test do
   gem 'rake', '~> 10.4'
   gem 'rubocop', '0.34.2'
   gem 'foreman'
+  gem 'stripe-ruby-mock', require: 'stripe_mock'
 end
 
 group :development do
   gem 'mongoid-shell'
-  gem 'heroku'
 end
 
 group :test do
@@ -41,4 +33,6 @@ group :test do
   gem 'database_cleaner'
   gem 'hyperclient'
   gem 'excon'
+  gem 'capybara'
+  gem 'selenium-webdriver'
 end

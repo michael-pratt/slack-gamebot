@@ -1,7 +1,7 @@
 Slack-Gamebot
 =============
 
-[![Add to Slack](https://platform.slack-edge.com/img/add_to_slack@2x.png)](http://playplay.io)
+[![Add to Slack](https://platform.slack-edge.com/img/add_to_slack@2x.png)](https://www.playplay.io)
 
 Or roll your own ...
 
@@ -18,7 +18,7 @@ A generic game bot for slack. Works for ping-pong (2, 4 or more players), chess,
 Create a new Bot Integration under [services/new/bot](http://slack.com/services/new/bot). Note the API token.
 You will be able to invoke gamebot by the name you give it in the UI above.
 
-Run `SLACK_API_TOKEN=<your API token> GAMEBOT_SECRET=secret foreman start`
+Run `SLACK_API_TOKEN=<your API token> foreman start`
 
 ## Production Deployment
 
@@ -63,6 +63,9 @@ gamebot register
 
 Welcome back Victor Barna! I've updated your registration.
 ```
+
+You can also remove yourself from the leaderboard with `gamebot unregister me` and re-register youself again with `gamebot register`.
+The data is not removed, but the user will no longer appear in the leaderboards and cannot participate in challenges.
 
 #### gamebot challenge &lt;opponent&gt; ... [with &lt;teammate&gt; ...]
 
@@ -201,12 +204,12 @@ Get the leaderboard.
 ```
 gamebot leaderboard
 
-1. Victor Barna: 3 wins, 2 losses (elo: 148)
+1. Victor Barna: 3 wins, 2 losses (elo: 148, lws: 5)
 2. Deng Yaping: 1 win, 3 losses (elo: 24)
 3. Wang Hoe: 0 wins, 1 loss (elo: -12)
 ```
 
-The leaderboard contains 3 topmost players ranked by [Elo](http://en.wikipedia.org/wiki/Elo_rating_system), use _leaderboard 10_ or _leaderboard infinity_ to see 10 players or more, respectively.
+The leaderboard contains 3 topmost players ranked by [Elo](http://en.wikipedia.org/wiki/Elo_rating_system), use _leaderboard 10_ or _leaderboard infinity_ to see 10 players or more, respectively. It also shows the longest winning (lws) and losing (lls) streaks of at least 3.
 
 In case you want to see leaderboard in reverse order (which would be totally wrong but motivational for people at the bottom of leaderboard), specify a negative number or `-infinity`:
 
@@ -215,7 +218,7 @@ gamebot leaderboard -5
 
 1. Wang Hoe: 0 wins, 1 loss (elo: -12)
 2. Deng Yaping: 1 win, 3 losses (elo: 24)
-3. Victor Barna: 3 wins, 2 losses (elo: 148)
+3. Victor Barna: 3 wins, 2 losses (elo: 148, lws: 5)
 ```
 
 #### gamebot matches [number|infinity]
@@ -316,6 +319,42 @@ Current: Deng Yaping: 1 win, 0 losses (elo: 48), 1 game, 2 players
 2015-07-16: Wang Hoe: 28 wins, 19 losses (elo: 214), 206 games, 25 players
 ```
 
+#### gamebot unregister &lt;player&gt;
+
+Captains can remove users.
+
+```
+gamebot unregister @WangHoe
+
+I've removed @WangHoe from the leaderboard.
+```
+
+#### gamebot set nickname [name]
+
+Sets a nickname for display purposes.
+
+```
+gamebot set nickname John Doe
+```
+
+Unset a nickname.
+
+```
+gamebot unset nickname
+```
+
+Captains can set nicknames of users by using a Slack mention.
+
+```
+gamebot set nickname @WangHoe John Doe
+```
+
+Captains can unset nicknames, too.
+
+```
+gamebot unset nickname @WangHoe
+```
+
 #### gamebot set gifs on|off
 
 Enable/disable GIFs for your team.
@@ -328,6 +367,20 @@ GIFs for team China are off.
 
 ![](screenshots/gifs.gif)
 
+Using `unset gifs` is equivalent to `set gifs off`.
+
+#### gamebot set elo [number]
+
+Set and resets the base elo for new seasons. Default is 0.
+
+```
+gamebot set elo 1000
+```
+
+```
+gamebot unset elo
+```
+
 #### gamebot set aliases &lt;alias|none&gt; ...
 
 Set additional aliases for the bot. For example you could upload a custom emoji for :pong: and set an alias for it.
@@ -338,9 +391,9 @@ gamebot set aliases pp :pong:
 Team China aliases are set to pp and :pong:.
 ```
 
-Remove all aliases with `set aliases none`.
-
 ![](screenshots/aliases.gif)
+
+Remove all aliases with `unset aliases`.
 
 #### gamebot set api on|off
 
@@ -350,12 +403,28 @@ Enable/disable team data in the public API for your team and displays team API U
 gamebot set api on
 
 API for team China is on!
-http://bots.playplay.io/teams/57224e65bc526eac95bfe316
+http://www.playplay.io/api/teams/57224e65bc526eac95bfe316
+```
+
+```
+gamebot unset api
+
+API for team China is off.
+```
+
+#### gamebot set unbalanced on|off
+
+Allow unbalanced challenges with different number of opponents.
+
+```
+gamebot set unbalanced on
+
+Unbalanced challenges for team China are on!
 ```
 
 ## API
 
-Slack-gamebot implements a Hypermedia API. Navigate to the application root to browse through available objects and methods. PlayPlay.io's Gamebot is [here](http://bots.playplay.io), you can see [dblock's current ping-pong elo here](http://bots.playplay.io/users/5543f64d6237640003000000).
+Slack-gamebot implements a Hypermedia API. Navigate to the application root to browse through available objects and methods. PlayPlay.io's Gamebot is [here](http://www.playplay.io/api), you can see [dblock's current ping-pong elo here](http://www.playplay.io/api/users/5543f64d6237640003000000).
 
 A team captain must opt-in serving data via the API with `set api on`. The data served by the API includes team's Slack IDs, usernames and game stats.
 
@@ -365,10 +434,10 @@ We recommend [HyperClient](https://github.com/codegram/hyperclient) to query the
 
 ## Contributing
 
-This bot is built with [slack-ruby-bot](https://github.com/dblock/slack-ruby-bot). See [CONTRIBUTING](CONTRIBUTING.md).
+This bot is built with [slack-ruby-bot-server](https://github.com/dblock/slack-ruby-bot-server). See [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Copyright and License
 
-Copyright (c) 2015, Daniel Doubrovkine, Artsy and [Contributors](CHANGELOG.md).
+Copyright (c) 2015-2016, Daniel Doubrovkine, Artsy and [Contributors](CHANGELOG.md).
 
 This project is licensed under the [MIT License](LICENSE.md).

@@ -5,7 +5,6 @@ describe Team do
   context '#find_or_create_from_env!' do
     before do
       ENV['SLACK_API_TOKEN'] = 'token'
-      ENV['GAMEBOT_SECRET'] = 'secret'
     end
     context 'team', vcr: { cassette_name: 'team_info' } do
       it 'creates a team' do
@@ -20,7 +19,6 @@ describe Team do
     end
     after do
       ENV.delete 'SLACK_API_TOKEN'
-      ENV.delete 'GAMEBOT_SECRET'
     end
   end
   context '#destroy' do
@@ -93,6 +91,22 @@ describe Team do
           it 'nudge' do
             expect(team.nudge?).to be false
           end
+        end
+      end
+      context 'with a recent match' do
+        let!(:match) { Fabricate(:match, team: team) }
+        it 'false' do
+          expect(team.asleep?).to be false
+          expect(team.nudge?).to be false
+          expect(team.dead?).to be false
+        end
+      end
+      context 'with a recent match lost to' do
+        let!(:match) { Fabricate(:match_lost_to, team: team) }
+        it 'false' do
+          expect(team.asleep?).to be false
+          expect(team.nudge?).to be false
+          expect(team.dead?).to be false
         end
       end
       context 'with an old challenge' do
@@ -182,7 +196,7 @@ describe Team do
       expect(client).to_not receive(:chat_postMessage)
       expect do
         team.nudge!
-      end.to_not change(team, :nudge_at)
+      end.to change(team, :nudge_at)
     end
   end
   context 'gifs' do
